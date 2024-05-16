@@ -46,6 +46,9 @@ class UserSerializer(serializers.ModelSerializer):
 class UserInfoSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
+        fields = (
+            'username',
+        )
         read_only_fields = ('role',)
 
 
