@@ -4,16 +4,17 @@ import datetime as dt
 import webcolors
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
-# from django.core.validators import MinValueValidator, MaxValueValidator
+from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from rest_framework import serializers
+from rest_framework.pagination import LimitOffsetPagination
 
 from users.constants import (
     USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH,
     FIRST_NAME_MAX_LENGTH, LAST_NAME_MAX_LENGTH,
     PASSWORD_MAX_LENGTH
 )
-# from reviews.models import Category, Genre, Title, Review, Comment
+from users.models import Follow
 from users.validators import forbidden_usernames
 
 User = get_user_model()
@@ -32,24 +33,33 @@ class Base64ImageField(serializers.ImageField):
 
 class UserSerializer(serializers.ModelSerializer):
     # image = Base64ImageField(required=False, allow_null=True)
+    is_subscribed = serializers.SerializerMethodField()
+    pagination_class = LimitOffsetPagination
 
     class Meta:
         model = User
         fields = (
-            'username', 'email', 'first_name', 'last_name', 'id'
+            'username', 'email', 'first_name',
+            'last_name', 'id', 'is_subscribed'
         )
+
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return Follow.objects.filter(
+                user=user, following=get_object_or_404(
+                        User, id=obj.id)).exists()
+        return False
 
     def validate_username(self, value):
         return forbidden_usernames(value)
 
 
-class UserInfoSerializer(UserSerializer):
-
-    class Meta(UserSerializer.Meta):
-        fields = (
-            'username',
-        )
-        read_only_fields = ('role',)
+class SetPasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(
+        max_length=PASSWORD_MAX_LENGTH, required=True)
+    new_password = serializers.CharField(
+        max_length=PASSWORD_MAX_LENGTH, required=True)
 
 
 class RegistrationSerializer(serializers.Serializer):
@@ -96,3 +106,14 @@ class TokenObtainSerializer(serializers.Serializer):
         required=True
     )
     password = serializers.CharField(required=True)
+
+
+class FollowSerializer(serializers.Serializer):
+    pagination_class = LimitOffsetPagination
+    
+    email = serializers.EmailField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    is_subscribed = serializers.BooleanField(read_only=True)
