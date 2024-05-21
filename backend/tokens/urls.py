@@ -1,19 +1,17 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import UserViewSet, follow
+from .views import token_obtain, token_destroy
 
-
-app_name = 'users'
+app_name = 'tokens'
 
 router = DefaultRouter()
-router.register('', UserViewSet, basename='user')
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('<int:pk>/subscribe/', follow),
+    path('token/login/', token_obtain, name='token_obtain'),
+    path('token/logout/', token_destroy, name='token_destroy'),
 ]
 
 if settings.DEBUG:

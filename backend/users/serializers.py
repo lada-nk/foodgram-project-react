@@ -1,7 +1,7 @@
 import base64
-import datetime as dt
+# import datetime as dt
 
-import webcolors
+# import webcolors
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -100,17 +100,9 @@ class RegistrationSerializer(serializers.Serializer):
         return forbidden_usernames(value)
 
 
-class TokenObtainSerializer(serializers.Serializer):
-    email = serializers.EmailField(
-        max_length=EMAIL_MAX_LENGTH,
-        required=True
-    )
-    password = serializers.CharField(required=True)
-
-
 class FollowSerializer(serializers.Serializer):
     pagination_class = LimitOffsetPagination
-    
+
     email = serializers.EmailField(read_only=True)
     username = serializers.CharField(read_only=True)
     first_name = serializers.CharField(read_only=True)

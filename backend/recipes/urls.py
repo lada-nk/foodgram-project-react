@@ -3,17 +3,16 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import UserViewSet, follow
+from .views import RecipeViewSet
 
 
-app_name = 'users'
+app_name = 'recipes'
 
 router = DefaultRouter()
-router.register('', UserViewSet, basename='user')
+router.register('', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('<int:pk>/subscribe/', follow),
 ]
 
 if settings.DEBUG:
