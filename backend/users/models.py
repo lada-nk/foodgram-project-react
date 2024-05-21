@@ -63,3 +63,14 @@ class User(AbstractUser):
             f'{self.is_staff=}, '
             f'{self.is_active=}, '
         )
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='follower', verbose_name='Кто подписан'
+    )
+    following = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='following', verbose_name='На кого подписан'
+    )
