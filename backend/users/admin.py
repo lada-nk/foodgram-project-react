@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User, Follow
 
 UserAdmin.fieldsets += (
-    ('Extra Fields', {'fields': ('role',)}),
+    ('Extra Fields', {'fields': ('role', 'avatar')}),
 )
 admin.site.register(User, UserAdmin)
 admin.site.register(Follow)
