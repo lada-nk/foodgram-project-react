@@ -6,9 +6,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .serializers import (
-                          UserSerializer, RegistrationSerializer, 
-                          SetPasswordSerializer, FollowSerializer)
+from .serializers import (UserSerializer, RegistrationSerializer, 
+                          SetPasswordSerializer, FollowSerializer,
+                          AvatarSerializer)
 from .permissions import UserRegistration
 from .models import Follow
 
@@ -17,7 +17,7 @@ User = get_user_model()
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
-    http_method_names = ['get', 'post', 'delete']
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete']
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     permission_classes = (UserRegistration,)
@@ -36,6 +36,19 @@ class UserViewSet(ModelViewSet):
     )
     def user_info(self, request, pk=None):
         return Response(self.get_serializer(request.user).data)
+
+    @action(
+        detail=False,
+        methods=['put', 'patch', 'delete'],
+        permission_classes=(permissions.IsAuthenticated,),
+        serializer_class=UserSerializer,
+        url_path='me/avatar'
+    )
+    def user_avatar(self, request, pk=None):
+        user = request.user
+        serializer = AvatarSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'avatar': user.avatar})
 
     @action(
         detail=False,
@@ -72,27 +85,23 @@ def follow(request, **kwargs):
                     user=user, following=following)
                 if created:
                     return Response({
-                            'email': user.email,
-                            'id': user.id,
-                            'username': user.username,
-                            'first_name': user.first_name,
-                            'last_name': user.last_name,
-                            'is_subscribed': True,
-                    }, status=status.HTTP_201_CREATED)
+                        'email': user.email, 'id': user.id,
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'is_subscribed': True}, status=status.HTTP_201_CREATED)
                 raise ValidationError(
-                    {'errors': 'Вы уже подписаны на этого автора.'},
+                    {'errors': f'Вы уже подписаны на автора {user.username}.'},
                     code='dublicate_errors',
                 )
             raise ValidationError(
-                    {'errors': 'Вы не можете быть подписаны на самого себя.'},
-                    code='id_errors',
-                )
+                {'errors': 'Вы не можете быть подписаны на самого себя.'},
+                code='id_errors')
         follow = Follow.objects.filter(user=user, following=following)
         if follow.exists():
             follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         raise ValidationError({
-            'errors': 'Вы не подписаны на этого автора.'},
-            code='not_follow_errors',
-        )
+            'errors': f'Вы не подписаны на автора {user.username}.'},
+            code='not_follow_errors')
     return Response(status=status.HTTP_401_UNAUTHORIZED)

@@ -1,11 +1,7 @@
-import base64
-# import datetime as dt
-
-# import webcolors
-from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -17,22 +13,12 @@ from users.constants import (
 from users.models import Follow
 from users.validators import forbidden_usernames
 
+
 User = get_user_model()
 
 
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
-
-
 class UserSerializer(serializers.ModelSerializer):
-    # image = Base64ImageField(required=False, allow_null=True)
+    avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
     pagination_class = LimitOffsetPagination
 
@@ -40,19 +26,26 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'username', 'email', 'first_name',
-            'last_name', 'id', 'is_subscribed'
-        )
+            'last_name', 'id', 'is_subscribed', 'avatar')
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:
             return Follow.objects.filter(
                 user=user, following=get_object_or_404(
-                        User, id=obj.id)).exists()
+                    User, id=obj.id)).exists()
         return False
 
     def validate_username(self, value):
         return forbidden_usernames(value)
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ('avatar',)
 
 
 class SetPasswordSerializer(serializers.Serializer):
