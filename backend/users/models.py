@@ -37,7 +37,7 @@ class User(AbstractUser):
     password = models.CharField(
         'Пароль', max_length=PASSWORD_MAX_LENGTH)
     avatar = models.ImageField(
-        'Аватар', upload_to='users/', null=True)
+        'Аватар', upload_to='users/', null=True, default=None)
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -78,5 +78,4 @@ class Follow(models.Model):
     def __str__(self):
         return (
             f'{self.user=:.20}, '
-            f'{self.following=:.20}'
-        )
+            f'{self.following=:.20}')

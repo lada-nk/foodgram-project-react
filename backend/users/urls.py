@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import UserViewSet, follow
+from .views import UserViewSet
 
 
 app_name = 'users'
@@ -13,7 +13,6 @@ router.register('', UserViewSet, basename='user')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('<int:pk>/subscribe/', follow),
 ]
 
 if settings.DEBUG:

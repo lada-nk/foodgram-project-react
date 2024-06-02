@@ -1,7 +1,6 @@
 import re
 
 from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
 
 
 def forbidden_usernames(value: str):
