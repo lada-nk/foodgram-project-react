@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.pagination import LimitOffsetPagination
 
-from .constants import EMAIL_MAX_LENGTH
+from users.constants import EMAIL_MAX_LENGTH
 
 
 User = get_user_model()
