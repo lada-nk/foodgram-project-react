@@ -33,16 +33,11 @@ class User(AbstractUser):
     role = models.CharField(
         'Тип пользователя',
         max_length=max(len(role[0]) for role in Role.choices),
-        choices=Role.choices, default=Role.USER
-    )
+        choices=Role.choices, default=Role.USER)
     password = models.CharField(
-        'Пароль', max_length=PASSWORD_MAX_LENGTH
-        )
-    image = models.ImageField(
-        upload_to='food/images/',
-        null=True,
-        default=None
-    )
+        'Пароль', max_length=PASSWORD_MAX_LENGTH)
+    avatar = models.ImageField(
+        'Аватар', upload_to='users/', null=True, default=None)
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -74,3 +69,13 @@ class Follow(models.Model):
         User, on_delete=models.CASCADE,
         related_name='following', verbose_name='На кого подписан'
     )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        ordering = ('user',)
+
+    def __str__(self):
+        return (
+            f'{self.user=:.20}, '
+            f'{self.following=:.20}')

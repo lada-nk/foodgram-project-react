@@ -11,3 +11,6 @@ pytest-pythonpath==0.7.3
 PyYAML==6.0
 python-dotenv==0.19.2
 django-filter==23.5
+urllib3==1.26.18
+django-extra-fields==3.0.2
+pyshorteners==1.0.1
