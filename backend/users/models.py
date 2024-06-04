@@ -11,6 +11,8 @@ from .constants import (
 
 
 class User(AbstractUser):
+    """Модель для пользлвателя."""
+
     email = models.EmailField(
         'Адресс электронной почты',
         unique=True,
@@ -61,14 +63,14 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
+    """Модель для подписок."""
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE,
-        related_name='follower', verbose_name='Кто подписан'
-    )
+        related_name='follower', verbose_name='Кто подписан')
     following = models.ForeignKey(
         User, on_delete=models.CASCADE,
-        related_name='following', verbose_name='На кого подписан'
-    )
+        related_name='following', verbose_name='На кого подписан')
 
     class Meta:
         verbose_name = 'Подписка'

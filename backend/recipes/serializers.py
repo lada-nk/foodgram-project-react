@@ -1,3 +1,4 @@
+import hashlib
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -13,18 +14,24 @@ User = get_user_model()
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """"Сериализатор для тэгов."""
+    
     class Meta:
         model = Tag
         fields = ('id', 'name', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """"Сериализатор для ингридиентов."""
+
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
+    """"Сериализатор для ингридиентов в рецепте."""
+
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -40,6 +47,8 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 
 class RecipieSerializer(serializers.ModelSerializer):
+    """"Сериализатор для рецептов."""
+
     tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientAmountSerializer(
@@ -150,6 +159,8 @@ class RecipieSerializer(serializers.ModelSerializer):
 
 
 class RecipeShortLinkSerializer(serializers.ModelSerializer):
+    """"Сериализатор для короткой ссылки на рецепт."""
+
     short_link = serializers.SerializerMethodField(
         'get_short_link', read_only=True)
 
@@ -159,5 +170,6 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
 
     def get_short_link(self, obj):
         if obj:
-            return self.context['request'].path
+            hash_object = hashlib.md5(self.context['request'].path.encode())
+            return hash_object.hexdigest()[:8]
         return None

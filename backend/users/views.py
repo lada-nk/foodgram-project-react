@@ -19,6 +19,8 @@ User = get_user_model()
 
 
 class UserViewSet(ModelViewSet):
+    """"Вьюсет для пользователей."""
+
     queryset = User.objects.all()
     http_method_names = ['get', 'post', 'put', 'patch', 'delete']
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)

@@ -23,6 +23,8 @@ User = get_user_model()
 
 
 class RecipeViewSet(ModelViewSet):
+    """"Вьюсет для рецептов."""
+
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipieSerializer
@@ -33,82 +35,47 @@ class RecipeViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    # def get_queryset(self):
-    #     queryset = Recipe.objects.all()
-    #     is_favorited = self.request.query_params.get('is_favorited')
-    #     is_in_shopping_cart = self.request.query_params.get(
-    #         'is_in_shopping_cart')
-    #     # if is_favorited is not None:
-    #     #     queryset = queryset
-    #     if is_in_shopping_cart is not None:
-    #         queryset = self.request.user.shopping_cart.all()
-    #         queryset = Recipe.objects.all()
-    #     return queryset
-
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=(permissions.IsAuthenticated,))
-    def favorite(self, request, pk):
+    def favorite_shopping_cart(self, queryset, request, pk):
+        """"Добавление/удаление рецепта в избранное/корзину"""
         user = request.user
+        recipe = get_object_or_404(Recipe, id=pk)
+        if queryset == Favorite.objects.all():
+            model_name = 'избранное'
+        model_name = 'корзину'
         if request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, id=pk)
-            favorite = Favorite.objects.filter(user=user, recipe=recipe)
+            favorite = queryset.filter(user=user, recipe=recipe)
             if favorite.exists():
                 favorite.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             raise ValidationError({
-                'errors': f'Вы не добавили рецепт {recipe.name} в избранное.'},
-                code='not_favorite_errors')
-        recipe = Recipe.objects.filter(id=pk)
-        if not recipe.exists():
-            raise ValidationError(
-                {'errors': 'Рецепта не существует.'},
-                code='no_recipe_errors')
-        recipe = recipe.first()
+                'errors': f'Вы не добавили рецепт {recipe.name} в {model_name}.'},
+                code='del_not_add_errors')
         serializer = RecipeShortSerializer(recipe)
-        favorite, created = Favorite.objects.get_or_create(
+        favorite, created = queryset.get_or_create(
             user=user, recipe=recipe)
         if created:
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         raise ValidationError({
-            'errors': f'Вы уже добавили рецепт {recipe.name} в избранное.'},
+            'errors': f'Вы уже добавили рецепт {recipe.name} в {model_name}.'},
             code='dublicate_errors')
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(permissions.IsAuthenticated,))
+    def favorite(self, request, pk):
+        return self.favorite_shopping_cart(Favorite.objects.all(), request, pk)
+
+    @action(detail=True, methods=['post', 'delete'],
+            permission_classes=(permissions.IsAuthenticated,))
     def shopping_cart(self, request, pk):
-        user = request.user
-        if request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, id=pk)
-            shopping_cart = ShoppingCart.objects.filter(user=user, recipe=recipe)
-            if shopping_cart.exists():
-                shopping_cart.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            raise ValidationError({
-                'errors': f'Вы не добавили рецепт {recipe.name} в корзину.'},
-                code='not_favorite_errors')
-        recipe = Recipe.objects.filter(id=pk)
-        if not recipe.exists():
-            raise ValidationError(
-                {'errors': 'Рецепта не существует.'},
-                code='no_recipe_errors')
-        recipe = recipe.first()
-        serializer = RecipeShortSerializer(recipe)
-        shopping_cart, created = ShoppingCart.objects.get_or_create(
-            user=user, recipe=recipe)
-        if created:
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        raise ValidationError({
-            'errors': f'Вы уже добавили рецепт {recipe.name} в корзину.'},
-            code='dublicate_errors')
+        return self.favorite_shopping_cart(ShoppingCart.objects.all(), request, pk)
+
 
     @action(detail=True, methods=['get'],
             permission_classes=(permissions.AllowAny,),
             url_path='get-link')
     def get_link(self, request, pk):
-        recipe = Recipe.objects.filter(id=pk)
-        recipe = recipe.first()
         serializer = RecipeShortLinkSerializer(
-            recipe, context={'request': request})
+            Recipe.objects.filter(id=pk).first(), context={'request': request})
         return Response(
             {'short-link': serializer.data['short_link']},
             status=status.HTTP_200_OK)
@@ -141,6 +108,8 @@ class RecipeViewSet(ModelViewSet):
 
 
 class IngredientViewSet(ModelViewSet):
+    """"Вьюсет для ингредиентов."""
+
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     http_method_names = ['get']
@@ -150,6 +119,8 @@ class IngredientViewSet(ModelViewSet):
 
 
 class TagViewSet(ModelViewSet):
+    """"Вьюсет для тэгов."""
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     http_method_names = ['get']

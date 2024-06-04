@@ -4,6 +4,7 @@ from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from rest_framework import serializers
+from drf_extra_fields.fields import Base64ImageField
 
 from users.constants import (
     USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH,
@@ -17,16 +18,9 @@ from users.validators import forbidden_usernames
 User = get_user_model()
 
 
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
-
-
 class UserSerializer(serializers.ModelSerializer):
+    """"Сериализатор для пользователей."""
+
     avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
 
@@ -49,6 +43,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AvatarSerializer(serializers.ModelSerializer):
+    """"Сериализатор для аватаров."""
+
     avatar = Base64ImageField(required=True, allow_null=True)
 
     class Meta:
@@ -57,6 +53,8 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 
 class SetPasswordSerializer(serializers.Serializer):
+    """"Сериализатор для пароля."""
+
     current_password = serializers.CharField(
         max_length=PASSWORD_MAX_LENGTH, required=True)
     new_password = serializers.CharField(
@@ -64,6 +62,8 @@ class SetPasswordSerializer(serializers.Serializer):
 
 
 class RegistrationSerializer(serializers.Serializer):
+    """"Сериализатор для регистрации пользователя."""
+
     email = serializers.EmailField(
         max_length=EMAIL_MAX_LENGTH, required=True)
     username = serializers.CharField(
@@ -101,6 +101,8 @@ class RegistrationSerializer(serializers.Serializer):
 
 
 class RecipeShortSerializer(serializers.Serializer):
+    """"Сериализатор для рецептов в подписках, избранном, корзине."""
+
     id = serializers.IntegerField(read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
     name = serializers.CharField(read_only=True)
@@ -108,6 +110,8 @@ class RecipeShortSerializer(serializers.Serializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    """"Сериализатор для подписок."""
+
     id = serializers.ReadOnlyField()
     email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
