@@ -74,8 +74,6 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=(permissions.AllowAny,),
             url_path='get-link')
     def get_link(self, request, pk):
-        serializer = RecipeShortLinkSerializer(
-            Recipe.objects.filter(id=pk).first(), context={'request': request})
         url = str('http://foodgram-ladank.sytes.net/recipes/') + str(pk)
         return Response(
             {'short-link': format(pyshorteners.Shortener().clckru.short(url))},
