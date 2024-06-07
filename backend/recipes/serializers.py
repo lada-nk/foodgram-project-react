@@ -172,6 +172,5 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
         if obj:
             # hash_object = hashlib.md5(self.context['request'].path.encode())
             # return hash_object.hexdigest()[:8]
-            return os.path.join(
-                'https://foodgram-ladank.sytes.net/recipes/', obj.id)
+            return https://foodgram-ladank.sytes.net/recipes/
         return None
