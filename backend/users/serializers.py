@@ -35,7 +35,7 @@ class RegistrationSerializer(UserCreateSerializer):
 
 
 class UserSerializer(UserSerializer):
-    """Сериализатор для пользователей."""
+    """Сериализатор для пользователей"""
 
     avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
