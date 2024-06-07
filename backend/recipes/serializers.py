@@ -157,7 +157,7 @@ class RecipieSerializer(serializers.ModelSerializer):
 
 
 class RecipeShortLinkSerializer(serializers.ModelSerializer):
-    """Сериализатор для короткой ссылки на рецепт."""
+    """Сериализатор для короткой ссылки на рецепт"""
 
     short_link = serializers.SerializerMethodField(
         'get_short_link', read_only=True)
