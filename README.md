@@ -1,3 +1,7 @@
+## Фудграм
+
+[![Main Foodgram workflow](https://github.com/lada-nk/foodgram-project-react/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/lada-nk/foodgram-project-react/actions/workflows/main.yml)
+
 Foodgram реализован для публикации рецептов. Авторизованные пользователи
 могут подписываться на понравившихся авторов, добавлять рецепты в избранное,
 в покупки, скачать список покупок ингредиентов для добавленных в покупки
