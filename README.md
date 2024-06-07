@@ -36,23 +36,16 @@ scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
 
 * Cоздайте .env файл и впишите:
     ```
-    DB_ENGINE=<django.db.backends.postgresql>
+    POSTGRES_DB=<имя базы данных postgres>
+    POSTGRES_USER=<пользователь бд>
+    POSTGRES_PASSWORD=<пароль>
     DB_NAME=<имя базы данных postgres>
-    DB_USER=<пользователь бд>
-    DB_PASSWORD=<пароль>
     DB_HOST=<db>
     DB_PORT=<5432>
     SECRET_KEY=<секретный ключ проекта django>
     ```
 * Для работы с Workflow добавьте в Secrets GitHub переменные окружения для работы:
     ```
-    DB_ENGINE=<django.db.backends.postgresql>
-    DB_NAME=<имя базы данных postgres>
-    DB_USER=<пользователь бд>
-    DB_PASSWORD=<пароль>
-    DB_HOST=<db>
-    DB_PORT=<5432>
-    
     DOCKER_PASSWORD=<пароль от DockerHub>
     DOCKER_USERNAME=<имя пользователя>
     
@@ -60,7 +53,7 @@ scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
 
     USER=<username для подключения к серверу>
     HOST=<IP сервера>
-    PASSPHRASE=<пароль для сервера, если он установлен>
+    SSH_PASSPHRASE=<пароль для сервера, если он установлен>
     SSH_KEY=<ваш SSH ключ (для получения команда: cat ~/.ssh/id_rsa)>
 
     TELEGRAM_TO=<ID чата, в который придет сообщение>
