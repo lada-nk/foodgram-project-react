@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from datetime import timedelta
 from dotenv import find_dotenv, load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +21,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'djoser',
+    'corsheaders',
     'django_filters',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
-    'tokens.apps.TokensConfig',
 ]
 
 MIDDLEWARE = [
@@ -61,23 +59,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'django'),
-#         'USER': os.getenv('POSTGRES_USER', 'django'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-#         'HOST': os.getenv('DB_HOST', ''),
-#         'PORT': os.getenv('DB_PORT', 5432)
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -118,17 +116,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^/api/.*$'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
-
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': (
+        'rest_framework.pagination.PageNumberPagination',),
     'PAGE_SIZE': 10,
-
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
 }
 
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=999),
-    'AUTH_HEADER_TYPES': ('Bearer',),
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'HIDE_USERS': False,
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.RegistrationSerializer',
+        'user': 'users.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ('rest_framework.permissions.AllowAny',),
+        'user_list': ('rest_framework.permissions.AllowAny',)
+    }
 }

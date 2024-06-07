@@ -1,42 +1,28 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, status
-from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
 
 
-from .serializers import (UserSerializer, RegistrationSerializer,
-                          SetPasswordSerializer, FollowSerializer,
-                          AvatarSerializer)
-from .permissions import UserRegistration
+from .serializers import (FollowSerializer, AvatarSerializer, UserSerializer)
 from .models import Follow
 from .pagination import LimitPageNumberPagination
 
 User = get_user_model()
 
 
-class UserViewSet(ModelViewSet):
-    """"Вьюсет для пользователей."""
+class UserViewSet(UserViewSet):
+    """Вьюсет для пользователей."""
 
-    queryset = User.objects.all()
-    http_method_names = ['get', 'post', 'put', 'patch', 'delete']
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
-    search_fields = ('username',)
-    permission_classes = (UserRegistration,)
     pagination_class = LimitPageNumberPagination
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return RegistrationSerializer
-        return UserSerializer
 
     @action(detail=False, methods=['get'],
             permission_classes=(permissions.IsAuthenticated,),
             serializer_class=UserSerializer, url_path='me')
-    def user_info(self, request, pk=None):
+    def me(self, request, pk=None):
         return Response(self.get_serializer(request.user).data)
 
     @action(detail=False, methods=['put', 'patch', 'delete'],
@@ -54,27 +40,11 @@ class UserViewSet(ModelViewSet):
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'],
-            permission_classes=(permissions.IsAuthenticated,))
-    def set_password(self, request, pk=None):
-        user = request.user
-        serializer = SetPasswordSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        check_pwd = bool(
-            user.password == serializer.data['current_password'])
-        if check_pwd:
-            user.password = serializer.data['new_password']
-            user.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        raise ValidationError(
-            {'password': 'Неверный пароль'},
-            code='invalid_password')
-
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(permissions.IsAuthenticated,))
-    def subscribe(self, request, pk):
+    def subscribe(self, request, id):
         user = request.user
-        following = get_object_or_404(User, id=pk)
+        following = get_object_or_404(User, id=id)
         if request.method == 'DELETE':
             follow = Follow.objects.filter(user=user, following=following)
             if not follow.exists():

@@ -23,7 +23,7 @@ User = get_user_model()
 
 
 class RecipeViewSet(ModelViewSet):
-    """"Вьюсет для рецептов."""
+    """Вьюсет для рецептов."""
 
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
@@ -108,7 +108,7 @@ class RecipeViewSet(ModelViewSet):
 
 
 class IngredientViewSet(ModelViewSet):
-    """"Вьюсет для ингредиентов."""
+    """Вьюсет для ингредиентов."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -119,7 +119,7 @@ class IngredientViewSet(ModelViewSet):
 
 
 class TagViewSet(ModelViewSet):
-    """"Вьюсет для тэгов."""
+    """Вьюсет для тэгов."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer

@@ -1,6 +1,7 @@
+import os
 import csv
-import sqlite3
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
@@ -8,6 +9,8 @@ from recipes.models import Ingredient
 
 
 User = get_user_model()
+
+DATA_ROOT = os.path.join(settings.BASE_DIR, 'data')
 
 
 FILE_MODEL_TABLE_FIELDS = [
@@ -43,7 +46,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for file, name, is_table, fields in FILE_MODEL_TABLE_FIELDS:
-            path = '../data/{}'.format(file)
+            path = os.path.join(DATA_ROOT, options['filename']).format(file)
             reader = csv.reader(open(path, 'r', encoding='utf-8'))
             next(reader)
             if is_table:

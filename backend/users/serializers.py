@@ -1,25 +1,46 @@
-import base64
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.shortcuts import get_object_or_404
-from django.db import IntegrityError
+from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
+from users.models import Follow
+from users.validators import forbidden_usernames
 from users.constants import (
     USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH,
     FIRST_NAME_MAX_LENGTH, LAST_NAME_MAX_LENGTH,
-    PASSWORD_MAX_LENGTH)
-from recipes.models import Recipe
-from users.models import Follow
-from users.validators import forbidden_usernames
+    PASSWORD_MAX_LENGTH
+)
 
 
 User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """"Сериализатор для пользователей."""
+class RegistrationSerializer(UserCreateSerializer):
+    """Сериализатор для регистрации пользователей."""
+
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())])
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH, required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())])
+
+    class Meta:
+        model = User
+        fields = (
+            'email', 'id', 'password', 'username', 'first_name', 'last_name')
+        extra_kwargs = {
+            'email': {'required': True}, 'username': {'required': True},
+            'password': {'required': True}, 'first_name': {'required': True},
+            'last_name': {'required': True}, }
+
+    def validate_username(self, value):
+        return forbidden_usernames(value)
+
+
+class UserSerializer(UserSerializer):
+    """Сериализатор для пользователей."""
 
     avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
@@ -38,12 +59,9 @@ class UserSerializer(serializers.ModelSerializer):
                     User, id=obj.id)).exists()
         return False
 
-    def validate_username(self, value):
-        return forbidden_usernames(value)
-
 
 class AvatarSerializer(serializers.ModelSerializer):
-    """"Сериализатор для аватаров."""
+    """Сериализатор для аватаров."""
 
     avatar = Base64ImageField(required=True, allow_null=True)
 
@@ -52,56 +70,8 @@ class AvatarSerializer(serializers.ModelSerializer):
         fields = ('avatar',)
 
 
-class SetPasswordSerializer(serializers.Serializer):
-    """"Сериализатор для пароля."""
-
-    current_password = serializers.CharField(
-        max_length=PASSWORD_MAX_LENGTH, required=True)
-    new_password = serializers.CharField(
-        max_length=PASSWORD_MAX_LENGTH, required=True)
-
-
-class RegistrationSerializer(serializers.Serializer):
-    """"Сериализатор для регистрации пользователя."""
-
-    email = serializers.EmailField(
-        max_length=EMAIL_MAX_LENGTH, required=True)
-    username = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH, required=True)
-    first_name = serializers.CharField(
-        max_length=FIRST_NAME_MAX_LENGTH, required=True)
-    last_name = serializers.CharField(
-        max_length=LAST_NAME_MAX_LENGTH, required=True)
-    password = serializers.CharField(
-        max_length=PASSWORD_MAX_LENGTH, required=True, write_only=True)
-    id = serializers.IntegerField(read_only=True)
-
-    def create(self, validated_data):
-        username = validated_data['username']
-        email = validated_data['email']
-        try:
-            user, created = User.objects.get_or_create(
-                username=username, email=email, defaults={
-                    'first_name': validated_data['first_name'],
-                    'last_name': validated_data['last_name'],
-                    'password': validated_data['password']})
-            return user
-        except IntegrityError:
-            if User.objects.filter(username=username).exists():
-                raise serializers.ValidationError(
-                    {'username': [f'username {username} уже занят']},
-                    code='duplicate_username')
-            if User.objects.filter(email=email).exists():
-                raise serializers.ValidationError(
-                    {'email': [f'email {email} уже занят']},
-                    code='duplicate_email')
-
-    def validate_username(self, value):
-        return forbidden_usernames(value)
-
-
 class RecipeShortSerializer(serializers.Serializer):
-    """"Сериализатор для рецептов в подписках, избранном, корзине."""
+    """Сериализатор для рецептов в подписках, избранном, корзине."""
 
     id = serializers.IntegerField(read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
@@ -110,7 +80,7 @@ class RecipeShortSerializer(serializers.Serializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """"Сериализатор для подписок."""
+    """Сериализатор для подписок."""
 
     id = serializers.ReadOnlyField()
     email = serializers.ReadOnlyField()
