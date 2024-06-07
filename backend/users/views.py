@@ -37,8 +37,6 @@ class UserViewSet(UserViewSet):
             user, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            user.avatar = serializer.data['avatar']
-            user.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post', 'delete'],

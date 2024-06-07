@@ -171,5 +171,5 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
         if obj:
             # hash_object = hashlib.md5(self.context['request'].path.encode())
             # return hash_object.hexdigest()[:8]
-            return self.context['request'].path
+            return obj.id
         return None
