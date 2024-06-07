@@ -1,3 +1,5 @@
+import pyshorteners
+
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
@@ -156,7 +158,7 @@ class RecipieSerializer(serializers.ModelSerializer):
 
 
 class RecipeShortLinkSerializer(serializers.ModelSerializer):
-    """Сериализатор для короткой ссылки на рецепт"""
+    """Сериализатор для короткой ссылки на рецепт."""
 
     short_link = serializers.SerializerMethodField(
         'get_short_link', read_only=True)
@@ -167,6 +169,6 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
 
     def get_short_link(self, obj):
         if obj:
-            # url = 'https://foodgram-ladank.sytes.net/recipes/'
-            return obj.id
+            url = 'https://foodgram-ladank.sytes.net/recipes/'
+            return pyshorteners.Shortener().clckru.short(url)
         return None
