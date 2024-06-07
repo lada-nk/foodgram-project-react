@@ -17,4 +17,3 @@ django-cors-headers==3.9.0
 social-auth-app-django==4.0.0
 social-auth-core==4.1.0
 pyshorteners==1.0.1
-django-shortlink==0.0.8

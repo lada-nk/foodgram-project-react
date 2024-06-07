@@ -99,6 +99,10 @@ sudo docker compose -f docker-compose.production.yml up -d
 ## Проект в интернете
 Проект запущен и доступен по [адресу](https://foodgram-ladank.sytes.net/recipes)
 
+## Админ
+foodamin@ya.ru
+gfhjkmtlfflvby1
+
 ### Использованные технологии:
 
 Django REST framework:

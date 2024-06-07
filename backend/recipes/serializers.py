@@ -5,7 +5,6 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from recipes.models import (
     IngredientAmount, Ingredient, Favorite, Recipe, ShoppingCart, Tag)
-from shortlink.models import ShortLink
 from users.serializers import UserSerializer
 
 User = get_user_model()
@@ -168,7 +167,6 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
 
     def get_short_link(self, obj):
         if obj:
-            url = 'https://foodgram-ladank.sytes.net/recipes/'
-            s = ShortLink.objects.create(full_url=url)
-            return s.short_url
+            # url = 'https://foodgram-ladank.sytes.net/recipes/'
+            return obj.id
         return None

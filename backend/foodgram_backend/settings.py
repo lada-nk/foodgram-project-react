@@ -20,7 +20,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_shortlink',
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
@@ -139,7 +138,3 @@ DJOSER = {
         'user_list': ('rest_framework.permissions.AllowAny',)
     }
 }
-
-SHORTEN_PATH_LENGTH = 8
-SHORTLINK_URL_BASE = 's/'
-HOST_ADDRESS = 'http://localhost:8000'
