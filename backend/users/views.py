@@ -6,8 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-
-from .serializers import (FollowSerializer, AvatarSerializer, UserSerializer)
+from .serializers import AvatarSerializer, FollowSerializer, UserSerializer
 from .models import Follow
 from .pagination import LimitPageNumberPagination
 

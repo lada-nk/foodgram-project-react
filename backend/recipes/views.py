@@ -1,23 +1,22 @@
-import pyshorteners
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.http import HttpResponse
-from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, status
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .serializers import (RecipieSerializer, IngredientSerializer,
-                          TagSerializer, RecipeShortLinkSerializer)
 from users.serializers import RecipeShortSerializer
-from .permissions import IsAuthorOrReadOnly
-from .models import Recipe, Ingredient, Tag, Favorite, ShoppingCart
+
 from .filters import IngredientFilter, RecipeFilter
+from .models import Ingredient, Favorite, Recipe, ShoppingCart, Tag
+from .permissions import IsAuthorOrReadOnly
+from .serializers import (IngredientSerializer, RecipieSerializer,
+                          RecipeShortLinkSerializer, TagSerializer)
 
 User = get_user_model()
 
@@ -48,7 +47,8 @@ class RecipeViewSet(ModelViewSet):
                 favorite.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             raise ValidationError({
-                'errors': f'Вы не добавили рецепт {recipe.name} в {model_name}.'},
+                'errors': f'Вы не добавили рецепт {recipe.name}'
+                f' в {model_name}.'},
                 code='del_not_add_errors')
         serializer = RecipeShortSerializer(recipe)
         favorite, created = queryset.get_or_create(
@@ -67,8 +67,8 @@ class RecipeViewSet(ModelViewSet):
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(permissions.IsAuthenticated,))
     def shopping_cart(self, request, pk):
-        return self.favorite_shopping_cart(ShoppingCart.objects.all(), request, pk)
-
+        return self.favorite_shopping_cart(
+            ShoppingCart.objects.all(), request, pk)
 
     @action(detail=True, methods=['get'],
             permission_classes=(permissions.AllowAny,),

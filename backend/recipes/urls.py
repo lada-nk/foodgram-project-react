@@ -1,11 +1,10 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import (RecipeViewSet, IngredientViewSet,
+from .views import (IngredientViewSet, RecipeViewSet,
                     TagViewSet)
-
 
 app_name = 'recipes'
 

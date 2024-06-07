@@ -1,8 +1,7 @@
-from django_filters import rest_framework as filters
 from django.contrib.auth import get_user_model
+from django_filters import rest_framework as filters
 
 from recipes.models import Ingredient, Recipe
-
 
 User = get_user_model()
 
@@ -39,4 +38,3 @@ class RecipeFilter(filters.FilterSet):
     class Meta:
         model = Recipe
         fields = ('tags', 'author')
-

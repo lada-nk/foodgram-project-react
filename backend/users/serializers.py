@@ -1,18 +1,13 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.shortcuts import get_object_or_404
-from rest_framework.validators import UniqueValidator
-from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
+from users.constants import USERNAME_MAX_LENGTH
 from users.models import Follow
 from users.validators import forbidden_usernames
-from users.constants import (
-    USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH,
-    FIRST_NAME_MAX_LENGTH, LAST_NAME_MAX_LENGTH,
-    PASSWORD_MAX_LENGTH
-)
-
 
 User = get_user_model()
 

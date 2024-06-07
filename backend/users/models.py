@@ -1,13 +1,10 @@
-from datetime import date
-
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import EmailValidator
 from django.db import models
 
 from .constants import (
-    Role, USERNAME_MAX_LENGTH, PASSWORD_MAX_LENGTH,
-    FIRST_NAME_MAX_LENGTH, LAST_NAME_MAX_LENGTH
-)
+    FIRST_NAME_MAX_LENGTH, LAST_NAME_MAX_LENGTH,
+    Role, PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH)
 
 
 class User(AbstractUser):

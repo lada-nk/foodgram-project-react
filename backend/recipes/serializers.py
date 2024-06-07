@@ -1,14 +1,14 @@
 import hashlib
-from django.shortcuts import get_object_or_404
+
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (
-    Recipe, Tag, Ingredient, IngredientAmount, Favorite, ShoppingCart)
+    IngredientAmount, Ingredient, Favorite, Recipe, ShoppingCart, Tag)
 from users.serializers import UserSerializer
-
 
 User = get_user_model()
 
