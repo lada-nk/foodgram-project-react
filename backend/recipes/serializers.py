@@ -153,19 +153,3 @@ class RecipieSerializer(serializers.ModelSerializer):
         self.create_ingredients(validated_data.get('ingredients'), instance)
         instance.save()
         return instance
-
-
-class RecipeShortLinkSerializer(serializers.ModelSerializer):
-    """Сериализатор для короткой ссылки на рецепт."""
-
-    short_link = serializers.SerializerMethodField(
-        'get_short_link', read_only=True)
-
-    class Meta:
-        model = Recipe
-        fields = ('short_link',)
-
-    def get_short_link(self, obj):
-        if obj:
-            return obj.id
-        return None
