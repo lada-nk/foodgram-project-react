@@ -10,7 +10,7 @@ Foodgram реализован для публикации рецептов. Ав
 ## Подготовка и запуск проекта
 ### Склонировать репозиторий на локальную машину:
 ```
-git clone https://github.com/NIK-TIGER-BILL/foodgram-project-react
+git clone git@github.com:lada-nk/foodgram-project-react.git
 ```
 ## Для работы с удаленным сервером (на ubuntu):
 * Выполните вход на свой удаленный сервер
@@ -21,13 +21,16 @@ sudo apt install docker.io
 ```
 * Установите docker-compose на сервер:
 ```
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+sudo apt update
+sudo apt install curl
+curl -fSL https://get.docker.com -o get-docker.sh
+sudo sh ./get-docker.sh
+sudo apt install docker-compose-plugin
 ```
 * Локально отредактируйте файл infra/nginx.conf и в строке server_name впишите свой IP
 * Скопируйте файлы docker-compose.yml и nginx.conf из директории infra на сервер:
 ```
-scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yml
+scp docker-compose.production.yml <username>@<host>:/home/<username>/docker-compose.production.yml
 scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
 ```
 
@@ -71,21 +74,21 @@ scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
   
 * На сервере соберите docker-compose:
 ```
-sudo docker-compose up -d --build
+sudo docker compose -f docker-compose.production.yml up -d
 ```
 * После успешной сборки на сервере выполните команды (только после первого деплоя):
     - Соберите статические файлы:
     ```
-    sudo docker-compose exec backend python manage.py collectstatic --noinput
+    sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
     ```
     - Примените миграции:
     ```
-    sudo docker-compose exec backend python manage.py migrate --noinput
+    sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
     ```
     - Загрузите ингридиенты  в базу данных (необязательно):  
     *Если файл не указывать, по умолчанию выберется ingredients.json*
     ```
-    sudo docker-compose exec backend python manage.py load_ingredients <Название файла из директории data>
+    sudo docker compose -f docker-compose.production.yml exec backend python manage.py import_json
     ```
     - Создать суперпользователя Django:
     ```
@@ -95,3 +98,28 @@ sudo docker-compose up -d --build
 
 ## Проект в интернете
 Проект запущен и доступен по [адресу](https://foodgram-ladank.sytes.net/recipes)
+
+### Использованные технологии:
+
+Django REST framework:
+
+```
+https://www.django-rest-framework.org/
+```
+
+Pillow:
+
+```
+https://pillow.readthedocs.io/en/stable/
+```
+
+PyJWT:
+
+```
+https://pyjwt.readthedocs.io/en/stable/
+```
+
+Requests:
+
+```
+https://requests.readthedocs.io/en/latest/

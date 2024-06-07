@@ -1,5 +1,3 @@
-import hashlib
-
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
@@ -7,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from recipes.models import (
     IngredientAmount, Ingredient, Favorite, Recipe, ShoppingCart, Tag)
+from shortlink.models import ShortLink
 from users.serializers import UserSerializer
 
 User = get_user_model()
@@ -170,6 +169,6 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
     def get_short_link(self, obj):
         if obj:
             url = 'https://foodgram-ladank.sytes.net/recipes/'
-            hash_object = hashlib.md5(url.encode())
-            return hash_object.hexdigest()[:8]
+            s = ShortLink.objects.create(full_url=url)
+            return s.short_url
         return None
