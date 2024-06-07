@@ -168,6 +168,6 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
 
     def get_short_link(self, obj):
         if obj:
-            return format(pyshorteners.Shortener(
-            ).clckru.short('https://foodgram-ladank.sytes.net/recipes/'))
+            url = '.'.join('https://foodgram-ladank.sytes.net/recipes/', obj.id)
+            return format(pyshorteners.Shortener().clckru.short(url))
         return None
