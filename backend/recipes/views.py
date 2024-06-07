@@ -16,7 +16,7 @@ from .filters import IngredientFilter, RecipeFilter
 from .models import Ingredient, Favorite, Recipe, ShoppingCart, Tag
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipieSerializer,
-                          RecipeShortLinkSerializer, TagSerializer)
+                          TagSerializer)
 
 User = get_user_model()
 
