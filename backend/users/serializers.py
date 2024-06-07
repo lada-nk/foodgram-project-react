@@ -66,7 +66,7 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 
 class RecipeShortSerializer(serializers.Serializer):
-    """Сериализатор для рецептов в подписках, избранном, корзине."""
+    """Сериализатор для рецептов в подписках, избранном, корзине"""
 
     id = serializers.IntegerField(read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
