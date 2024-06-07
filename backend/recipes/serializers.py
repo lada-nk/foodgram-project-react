@@ -1,4 +1,4 @@
-import hashlib
+# import hashlib
 
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -169,7 +169,7 @@ class RecipeShortLinkSerializer(serializers.ModelSerializer):
 
     def get_short_link(self, obj):
         if obj:
-            hash_object = hashlib.md5(self.context['request'].path.encode())
+            # hash_object = hashlib.md5(self.context['request'].path.encode())
             # return hash_object.hexdigest()[:8]
             return self.context['request'].path
         return None
