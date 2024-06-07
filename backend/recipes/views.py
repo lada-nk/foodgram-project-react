@@ -9,7 +9,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-
 from users.serializers import RecipeShortSerializer
 
 from .filters import IngredientFilter, RecipeFilter

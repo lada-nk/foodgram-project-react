@@ -5,9 +5,9 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from users.constants import USERNAME_MAX_LENGTH
-from users.models import Follow
-from users.validators import forbidden_usernames
+from .constants import USERNAME_MAX_LENGTH
+from .models import Follow
+from .validators import forbidden_usernames
 
 User = get_user_model()
 
