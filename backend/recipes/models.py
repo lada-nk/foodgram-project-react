@@ -9,6 +9,15 @@ from .constants import (
 User = get_user_model()
 
 
+class BaseModel(models.Model):
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Добавлено')
+
+    class Meta:
+        abstract = True
+
+
 class Ingredient(models.Model):
     """Модель для ингридиентов."""
 
@@ -50,7 +59,7 @@ class Tag(models.Model):
             f'{self.slug=}')
 
 
-class Recipe(models.Model):
+class Recipe(BaseModel):
     """Модель для рецептов."""
 
     author = models.ForeignKey(
