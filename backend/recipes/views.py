@@ -76,7 +76,7 @@ class RecipeViewSet(ModelViewSet):
     def get_link(self, request, pk):
         url = str('http://foodgram-ladank.sytes.net/recipes/') + str(pk)
         return Response(
-            {'short-link': format(pyshorteners.Shortener().tinyurl.short(url))},
+            {'short-link': pyshorteners.Shortener().tinyurl.short(url)},
             status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'],
