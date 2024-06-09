@@ -11,7 +11,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = True
 
-# ALLOWED_HOSTS = ['foodgram-ladank.sytes.net', '51.250.99.60']
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(', ')
 
 INSTALLED_APPS = [
