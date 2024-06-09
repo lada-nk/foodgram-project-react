@@ -13,7 +13,7 @@ from rest_framework.viewsets import ModelViewSet
 from users.serializers import RecipeShortSerializer
 
 from .filters import IngredientFilter, RecipeFilter
-from .models import Ingredient, Favorite, Recipe, ShoppingCart, Tag
+from recipes.models import Ingredient, Favorite, Recipe, ShoppingCart, Tag
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipieSerializer,
                           TagSerializer)
