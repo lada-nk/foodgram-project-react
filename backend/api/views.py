@@ -4,6 +4,7 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
 from rest_framework import filters, permissions, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -17,9 +18,10 @@ from users.serializers import RecipeShortSerializer
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import LimitPageNumberPagination
 from .permissions import IsAuthorOrReadOnly
-from .serializers.recipes_serializers import (IngredientSerializer, RecipieSerializer,
-                          TagSerializer)
-from .serializers.users_serializers import AvatarSerializer, FollowSerializer, UserSerializer
+from .serializers.recipes_serializers import (
+    IngredientSerializer, RecipieSerializer, TagSerializer)
+from .serializers.users_serializers import (
+    AvatarSerializer, FollowSerializer, UserSerializer)
 
 User = get_user_model()
 
