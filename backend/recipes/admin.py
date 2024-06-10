@@ -24,9 +24,9 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('^name',)
 
 
-admin.site.register(Recipe)
+admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag)
-admin.site.register(Ingredient)
+admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(IngredientAmount)
 admin.site.register(Favorite)
 admin.site.register(ShoppingCart)
