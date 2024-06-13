@@ -7,9 +7,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 from api.utils import create_queryset_obj
-from recipes.models import (
-    IngredientAmount, Ingredient, Favorite, Recipe, ShoppingCart, Tag)
-from users.constants import USERNAME_MAX_LENGTH
 from users.models import Follow
 
 User = get_user_model()
@@ -80,18 +77,19 @@ class FollowSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'first_name', 'last_name',
-                  'avatar', 'is_subscribed', 'recipes', 'recipes_count')
-        read_only_fields = ('id', 'email', 'username', 'first_name', 'last_name',
-                  'avatar')
-    
+        fields = (
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'avatar', 'is_subscribed', 'recipes', 'recipes_count')
+        read_only_fields = (
+            'id', 'email', 'username', 'first_name', 'last_name', 'avatar')
+
     def create(self, validated_data):
         try:
             return create_queryset_obj(self)
         except IntegrityError as err:
             raise ValidationError(
                 {'errors': 'Вы не можете быть подписаны на самого себя'},
-                code='id_errors')  from err
+                code='id_errors') from err
 
     def get_recipes(self, obj):
         queryset = obj.recipe_set.all()

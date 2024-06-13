@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -33,8 +32,8 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.CharField(read_only=True,
-        source='ingredient.measurement_unit')
+    measurement_unit = serializers.CharField(
+        read_only=True, source='ingredient.measurement_unit')
     amount = serializers.IntegerField(min_value=1, required=True)
 
     class Meta:
@@ -71,7 +70,6 @@ class RecipieSerializer(serializers.ModelSerializer):
             user_id=user.id, recipe=get_object_or_404(
                 Recipe, id=obj.id)).exists()
 
-
     def get_is_favorited(self, obj):
         user = self.context['request'].user
         return Favorite.objects.filter(
@@ -83,7 +81,7 @@ class RecipieSerializer(serializers.ModelSerializer):
         ingredients = self.initial_data.get('ingredients')
         data['ingredients'] = self.validate_ingredients(ingredients)
         return data
-    
+
     def validate_ingredients(self, value):
         if not value:
             raise serializers.ValidationError({
@@ -93,15 +91,15 @@ class RecipieSerializer(serializers.ModelSerializer):
         len_ingredients_id = len(ingredients_id)
         if len_ingredients_id != len(set(ingredients_id)):
             raise serializers.ValidationError(
-                {'ingredients': 'Дублирование ингридиентов'},
+                {'ingredients': 'Дублирование ингридиентов.'},
                 code='dublicate_ingredients')
         ingredients_exist = Ingredient.objects.in_bulk(ingredients_id)
         if len_ingredients_id != len(ingredients_exist.keys()):
             raise serializers.ValidationError(
-                {'ingredients': f'Несуществующий ингридиент'},
+                {'ingredients': 'Несуществующий ингридиент.'},
                 code='non_exsisting_ingredients')
         return value
-    
+
     def validate_tags(self, value):
         if not value:
             raise serializers.ValidationError(
@@ -114,7 +112,8 @@ class RecipieSerializer(serializers.ModelSerializer):
         tags = Tag.objects.in_bulk(value)
         if len_value != len(tags.keys()):
             raise serializers.ValidationError(
-                {'ingredients': f'Несуществующий тэг'}, code='non_exsisting_tags')
+                {'ingredients': 'Несуществующий тэг'},
+                code='non_exsisting_tags')
         return value
 
     def validate_image(self, value):

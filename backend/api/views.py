@@ -2,13 +2,11 @@ import pyshorteners
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import filters, permissions, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSetMixin
 from recipes.models import Ingredient, Favorite, Recipe, ShoppingCart, Tag
@@ -34,15 +32,16 @@ class SelectObjectMixin(ViewSetMixin):
         user = request.user
         select_object = self.get_object()
         if request.method == 'DELETE':
-            delete_obj, delete = queryset.filter(user=user,
-                **{name_object: select_object}).delete()
+            delete_obj, delete = queryset.filter(
+                user=user, **{name_object: select_object}).delete()
             serializer = DeleteSerializer(
                 data=request.data, context={'delete_obj': delete_obj})
             serializer.is_valid(raise_exception=True)
             return Response(status=status.HTTP_204_NO_CONTENT)
-        serializer = self.get_serializer(data=request.data,
+        serializer = self.get_serializer(
+            data=request.data,
             context={'request': request, 'select_object': select_object,
-                    'queryset':queryset, 'name_object': name_object})
+                     'queryset': queryset, 'name_object': name_object})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -58,17 +57,16 @@ class RecipeViewSet(ModelViewSet, SelectObjectMixin):
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     filterset_class = RecipeFilter
 
-
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(permissions.IsAuthenticated,),
-            serializer_class = RecipeShortSerializer)
+            serializer_class=RecipeShortSerializer)
     def favorite(self, request, pk):
         return self.add_delete_to_queryset(
             Favorite.objects.all(), 'recipe', request, pk)
 
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(permissions.IsAuthenticated,),
-            serializer_class = RecipeShortSerializer)
+            serializer_class=RecipeShortSerializer)
     def shopping_cart(self, request, pk):
         return self.add_delete_to_queryset(
             ShoppingCart.objects.all(), 'recipe', request, pk)

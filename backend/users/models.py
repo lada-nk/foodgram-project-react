@@ -18,11 +18,12 @@ class User(AbstractUser):
             message='Введите корректный адрес электронной почты.')],
         error_messages={
             'unique': 'Пользователь с таким адресом'
-                      'электронной почты уже существует.',})
+                      'электронной почты уже существует.'})
     username = models.CharField(
         'Имя пользователя',
         unique=True, max_length=USERNAME_MAX_LENGTH,
-        validators=[RegexValidator(
+        validators=[
+            RegexValidator(
                 regex=r'[\w.@+-]+',
                 message='Введите корректное имя пользователя.',
                 code='invalid_username')])
@@ -68,7 +69,8 @@ class Follow(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'following'), name='unique_subscription'),
-            models.CheckConstraint(check=~Q(following=F('user')), name='not_self_folowing'))
+            models.CheckConstraint(
+                check=~Q(following=F('user')), name='not_self_folowing'))
 
     def __str__(self):
         return (

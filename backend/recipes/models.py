@@ -138,6 +138,7 @@ class SelectRecipeBaseModel(models.Model):
             f'{self.user=:.20}, '
             f'{self.recipe=:.20}')
 
+
 class Favorite(SelectRecipeBaseModel):
     """Модель для избранного."""
 
