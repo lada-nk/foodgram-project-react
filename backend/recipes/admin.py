@@ -7,12 +7,12 @@ from .models import (
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'get_favorite_count')
-    list_filter = ('tags__title')
+    list_filter = ('tags__name',)
     search_fields = ('name', 'author__username', 'author__id')
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        return queryset.annotate(favorite_count=Count('favored_by'))
+        return queryset.annotate(favorite_count=Count('favorite'))
 
     @staticmethod
     def get_favorite_count(obj):

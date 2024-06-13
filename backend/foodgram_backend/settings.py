@@ -105,7 +105,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'collected_static'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/foodgram/media/'
+# MEDIA_ROOT = '/var/www/foodgram/media/'
+MEDIA_ROOT = BASE_DIR / 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -130,12 +131,14 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user_create': 'users.serializers.RegistrationSerializer',
-        'user': 'users.serializers.UserSerializer',
-        'current_user': 'users.serializers.UserSerializer',
+        'user_create': 'api.serializers.users_serializers.RegistrationSerializer',
+        'user': 'api.serializers.users_serializers.UserSerializer',
+        'current_user': 'api.serializers.users_serializers.UserSerializer',
     },
     'PERMISSIONS': {
         'user': ('rest_framework.permissions.AllowAny',),
         'user_list': ('rest_framework.permissions.AllowAny',)
     }
 }
+
+BASE_SHORT_RECIPE_URL = 'http://foodgram-ladank.sytes.net/recipes/'
