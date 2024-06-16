@@ -86,8 +86,7 @@ class Recipe(models.Model):
             f'{self.name=}, '
             f'{self.text=}, '
             f'{self.tags=}, '
-            f'{self.cooking_time=}, '
-            f'{self.slug=}')
+            f'{self.cooking_time=}')
 
 
 class IngredientAmount(models.Model):
