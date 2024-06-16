@@ -139,6 +139,7 @@ class Favorite(SelectRecipeBaseModel):
     """Модель для избранного."""
 
     class Meta(SelectRecipeBaseModel.Meta):
+        verbose_name = 'Избранное'
         default_related_name = 'favorite'
         constraints = [
             models.UniqueConstraint(
@@ -149,6 +150,7 @@ class ShoppingCart(SelectRecipeBaseModel):
     """Модель для корзины."""
 
     class Meta(SelectRecipeBaseModel.Meta):
+        verbose_name = 'Корзина'
         default_related_name = 'customer'
         constraints = [
             models.UniqueConstraint(

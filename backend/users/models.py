@@ -45,7 +45,6 @@ class User(AbstractUser):
         return (
             f'{self.username=:.20}, '
             f'{self.email=}, '
-            f'{self.role=}, '
             f'{self.first_name=:.20}, '
             f'{self.last_name=:.20}, '
             f'{self.is_staff=}, '
