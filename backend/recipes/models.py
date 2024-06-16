@@ -110,11 +110,11 @@ class IngredientAmount(models.Model):
                 fields=('ingredient', 'recipe'),
                 name='unique_recipe_ingredient')]
 
-    def __str__(self):
-        return (
-            # f'{self.ingredient=:20}, '
-            f'{self.recipe=:20}, '
-            f'{self.amount=:20}')
+    # def __str__(self):
+    #     return (
+    #         f'{self.ingredient=:20}, '
+    #         f'{self.recipe=:20}, '
+    #         f'{self.amount=:20}')
 
 
 class SelectRecipeBaseModel(models.Model):
