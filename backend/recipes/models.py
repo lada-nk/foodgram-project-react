@@ -28,7 +28,7 @@ class Ingredient(models.Model):
     def __str__(self):
         return (
             f'{self.id=}, '
-            f'{self.name=:.20}, '
+            f'{self.name=}, '
             f'{self.measurement_unit=}')
 
 
@@ -49,7 +49,7 @@ class Tag(models.Model):
 
     def __str__(self):
         return (
-            f'{self.name=:.20}, '
+            f'{self.name=}, '
             f'{self.slug=}')
 
 
@@ -82,9 +82,9 @@ class Recipe(models.Model):
 
     def __str__(self):
         return (
-            f'{self.author=:.20}, '
-            f'{self.title=:.20}, '
-            f'{self.text=:.20}, '
+            f'{self.author=}, '
+            f'{self.title=}, '
+            f'{self.text=}, '
             f'{self.tags=}, '
             f'{self.cooking_time=}, '
             f'{self.slug=}')
@@ -112,9 +112,9 @@ class IngredientAmount(models.Model):
 
     def __str__(self):
         return (
-            f'{self.ingredient=:.20}, '
-            f'{self.recipe=:.20}, '
-            f'{self.amount=:.20}')
+            f'{self.ingredient=}, '
+            f'{self.recipe=}, '
+            f'{self.amount=}')
 
 
 class SelectRecipeBaseModel(models.Model):
@@ -131,8 +131,8 @@ class SelectRecipeBaseModel(models.Model):
 
     def __str__(self):
         return (
-            f'{self.user=:.20}, '
-            f'{self.recipe=:.20}')
+            f'{self.user=}, '
+            f'{self.recipe=}')
 
 
 class Favorite(SelectRecipeBaseModel):

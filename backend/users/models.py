@@ -43,10 +43,10 @@ class User(AbstractUser):
 
     def __str__(self):
         return (
-            f'{self.username=:.20}, '
+            f'{self.username=}, '
             f'{self.email=}, '
-            f'{self.first_name=:.20}, '
-            f'{self.last_name=:.20}, '
+            f'{self.first_name=}, '
+            f'{self.last_name=}, '
             f'{self.is_staff=}, '
             f'{self.is_active=}')
 
@@ -73,5 +73,5 @@ class Follow(models.Model):
 
     def __str__(self):
         return (
-            f'{self.user=:.20}, '
-            f'{self.following=:.20}')
+            f'{self.user=}, '
+            f'{self.following=}')
