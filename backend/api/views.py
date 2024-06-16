@@ -1,26 +1,29 @@
 import pyshorteners
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import filters, permissions, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, ViewSetMixin
+from rest_framework.viewsets import (
+    ModelViewSet, ViewSetMixin, ReadOnlyModelViewSet)
 from recipes.models import Ingredient, Favorite, Recipe, ShoppingCart, Tag
 from users.models import Follow
-from foodgram_backend.settings import BASE_SHORT_RECIPE_URL
 
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import LimitPageNumberPagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers.recipes_serializers import (
-    IngredientSerializer, RecipieSerializer, TagSerializer)
+    IngredientSerializer, RecipeRequestSerializer,
+    RecipeResponseSerializer, TagSerializer)
 from .serializers.users_serializers import (
-    AvatarSerializer, DeleteSerializer, FollowSerializer,
-    RecipeShortSerializer, UserSerializer)
+    AvatarSerializer, FollowSerializer,
+    RecipeShortFavoriteSerializer, RecipeShortShoppingCartSerializer,
+    UserSerializer)
 
 User = get_user_model()
 
@@ -28,22 +31,18 @@ User = get_user_model()
 class SelectObjectMixin(ViewSetMixin):
     """"Добавление/удаление в queryset."""
 
-    def add_delete_to_queryset(self, queryset, name_object, request, pk):
+    def add_delete_to_queryset(self, queryset, name_object, request):
         user = request.user
         select_object = self.get_object()
         if request.method == 'DELETE':
-            delete_obj, delete = queryset.filter(
+            delete_obj, _ = queryset.filter(
                 user=user, **{name_object: select_object}).delete()
-            serializer = DeleteSerializer(
-                data=request.data, context={'delete_obj': delete_obj})
-            serializer.is_valid(raise_exception=True)
+            if delete_obj == 0:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_204_NO_CONTENT)
-        serializer = self.get_serializer(
-            data=request.data,
-            context={'request': request, 'select_object': select_object,
-                     'queryset': queryset, 'name_object': name_object})
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(select_object=select_object)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -52,30 +51,52 @@ class RecipeViewSet(ModelViewSet, SelectObjectMixin):
 
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
-    serializer_class = RecipieSerializer
     pagination_class = LimitPageNumberPagination
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     filterset_class = RecipeFilter
+    serializer_class = RecipeResponseSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = RecipeRequestSerializer(
+            data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        response_serializer = RecipeResponseSerializer(
+            instance=serializer.save(), context={'request': request})
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = RecipeRequestSerializer(
+            instance, data=request.data,
+            context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+        response_serializer = RecipeResponseSerializer(
+            instance=serializer.save(), context={'request': request})
+        return Response(response_serializer.data)
 
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(permissions.IsAuthenticated,),
-            serializer_class=RecipeShortSerializer)
+            serializer_class=RecipeShortFavoriteSerializer)
     def favorite(self, request, pk):
         return self.add_delete_to_queryset(
-            Favorite.objects.all(), 'recipe', request, pk)
+            Favorite.objects.all(), 'recipe', request)
 
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(permissions.IsAuthenticated,),
-            serializer_class=RecipeShortSerializer)
+            serializer_class=RecipeShortShoppingCartSerializer)
     def shopping_cart(self, request, pk):
         return self.add_delete_to_queryset(
-            ShoppingCart.objects.all(), 'recipe', request, pk)
+            ShoppingCart.objects.all(), 'recipe', request)
 
     @action(detail=True,
             permission_classes=(permissions.AllowAny,),
             url_path='get-link')
     def get_link(self, request, pk):
-        url = str(BASE_SHORT_RECIPE_URL) + str(pk)
+        url = f'http://{settings.BASE_SHORT_RECIPE_URL}/recipes/{pk}'
         return Response(
             {'short-link': pyshorteners.Shortener().tinyurl.short(url)})
 
@@ -89,9 +110,7 @@ class RecipeViewSet(ModelViewSet, SelectObjectMixin):
             'recipe').order_by(name).values(
                 name, measurement_unit).annotate(amount=Sum(amount)).all()
         if not ingredients:
-            raise ValidationError(
-                {'ingredients': 'Для покупок нужны ингредиенты'},
-                code='no_ingredients')
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         text = 'Список покупок:\n\n'
         for number, ingredient in enumerate(ingredients, start=1):
             amount = ingredient.get('amount')
@@ -106,23 +125,21 @@ class RecipeViewSet(ModelViewSet, SelectObjectMixin):
         return response
 
 
-class IngredientViewSet(ModelViewSet):
+class IngredientViewSet(ReadOnlyModelViewSet):
     """Вьюсет для ингредиентов."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    http_method_names = ('get',)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
     pagination_class = None
 
 
-class TagViewSet(ModelViewSet):
+class TagViewSet(ReadOnlyModelViewSet):
     """Вьюсет для тэгов."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    http_method_names = ('get',)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = None
 
@@ -147,18 +164,20 @@ class UserViewSet(UserViewSet, SelectObjectMixin):
             user.avatar = None
             user.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        serializer = AvatarSerializer(
-            user, data=request.data)
+        serializer = AvatarSerializer(user, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
 
     @action(detail=True, methods=('post', 'delete'),
             serializer_class=FollowSerializer,
             permission_classes=(permissions.IsAuthenticated,))
     def subscribe(self, request, id):
-        return self.add_delete_to_queryset(
-            Follow.objects.all(), 'following', request, id)
+        try:
+            return self.add_delete_to_queryset(
+                Follow.objects.all(), 'following', request)
+        except IntegrityError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, serializer_class=FollowSerializer,
             permission_classes=(permissions.IsAuthenticated,))
@@ -166,5 +185,5 @@ class UserViewSet(UserViewSet, SelectObjectMixin):
         serializer = self.get_serializer(
             self.paginate_queryset(
                 [follow.following for follow in request.user.follower.all()]),
-            many=True, context={'request': request})
+            many=True)
         return self.get_paginated_response(serializer.data)

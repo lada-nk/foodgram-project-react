@@ -1,15 +1,27 @@
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
-from api.utils import create_queryset_obj
+from recipes.models import Favorite, ShoppingCart
 from users.models import Follow
 
 User = get_user_model()
+
+
+class CreateQuerysetObjMixin:
+    """Миксин для добавления объекта в Queryset."""
+
+    def create_queryset_obj(self, name_object, select_object, queryset):
+        user = self.context['request'].user
+        queryset_obj, created = queryset.get_or_create(
+            user=user, **{name_object: select_object})
+        if created:
+            return select_object
+        raise ValidationError(
+            {'errors': 'Уже существует.'}, code='dublicate_errors')
 
 
 class RegistrationSerializer(UserCreateSerializer):
@@ -42,22 +54,22 @@ class UserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        return Follow.objects.filter(
-            user_id=user.id, following=get_object_or_404(
-                User, id=obj.id)).exists()
+        return user.is_authenticated and user.follower.filter(
+            following=get_object_or_404(User, id=obj.id)).exists()
 
 
 class AvatarSerializer(serializers.ModelSerializer):
     """Сериализатор для аватаров."""
 
-    avatar = Base64ImageField(required=True, allow_null=True)
+    avatar = Base64ImageField()
 
     class Meta:
         model = User
         fields = ('avatar',)
 
 
-class RecipeShortSerializer(serializers.Serializer):
+class RecipeShortBaseSerializer(serializers.Serializer,
+                                CreateQuerysetObjMixin):
     """Сериализатор для рецептов в подписках, избранном, корзине."""
 
     id = serializers.IntegerField(read_only=True)
@@ -65,11 +77,26 @@ class RecipeShortSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     cooking_time = serializers.IntegerField(read_only=True)
 
+
+class RecipeShortFavoriteSerializer(RecipeShortBaseSerializer):
+    """Сериализатор для рецептов в подписках, избранном, корзине."""
+
     def create(self, validated_data):
-        return create_queryset_obj(self)
+        return self.create_queryset_obj(
+            'recipe', validated_data.pop('select_object'),
+            Favorite.objects.all())
 
 
-class FollowSerializer(UserSerializer):
+class RecipeShortShoppingCartSerializer(RecipeShortBaseSerializer):
+    """Сериализатор для рецептов в подписках, избранном, корзине."""
+
+    def create(self, validated_data):
+        return self.create_queryset_obj(
+            'recipe', validated_data.pop('select_object'),
+            ShoppingCart.objects.all())
+
+
+class FollowSerializer(UserSerializer, CreateQuerysetObjMixin):
     """Сериализатор для подписок."""
 
     recipes = serializers.SerializerMethodField()
@@ -84,29 +111,16 @@ class FollowSerializer(UserSerializer):
             'id', 'email', 'username', 'first_name', 'last_name', 'avatar')
 
     def create(self, validated_data):
-        try:
-            return create_queryset_obj(self)
-        except IntegrityError as err:
-            raise ValidationError(
-                {'errors': 'Вы не можете быть подписаны на самого себя'},
-                code='id_errors') from err
+        return self.create_queryset_obj(
+            'following', validated_data.pop('select_object'),
+            Follow.objects.all())
 
     def get_recipes(self, obj):
         queryset = obj.recipe_set.all()
         recipes_limit = self.context['request'].GET.get('recipes_limit')
         if recipes_limit:
             queryset = queryset[:int(recipes_limit)]
-        return RecipeShortSerializer(queryset, many=True).data
+        return RecipeShortBaseSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
         return obj.recipe_set.all().count()
-
-
-class DeleteSerializer(serializers.Serializer):
-    """Сериализатор для обработки ошибок при удалении объекта."""
-
-    def validate(self, data):
-        if self.context['delete_obj'] == 0:
-            raise ValidationError({
-                'errors': 'Не существует.'}, code='del_not_add_errors')
-        return data

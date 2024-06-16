@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from .constants import (
@@ -7,15 +7,6 @@ from .constants import (
     RECIPE_TITLE_MAX_LENGTH, SLUG_MAX_LENGTH, TAG_NAME_MAX_LENGTH)
 
 User = get_user_model()
-
-
-class BaseModel(models.Model):
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Добавлено')
-
-    class Meta:
-        abstract = True
 
 
 class Ingredient(models.Model):
@@ -36,6 +27,7 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return (
+            f'{self.id=:}, '
             f'{self.name=:20}, '
             f'{self.measurement_unit=}')
 
@@ -61,7 +53,7 @@ class Tag(models.Model):
             f'{self.slug=}')
 
 
-class Recipe(BaseModel):
+class Recipe(models.Model):
     """Модель для рецептов."""
 
     author = models.ForeignKey(
@@ -74,10 +66,14 @@ class Recipe(BaseModel):
     tags = models.ManyToManyField(
         Tag, verbose_name='Теги публикации')
     cooking_time = models.PositiveSmallIntegerField(
-        'Время приготовления в минутах')
+        'Время приготовления в минутах',
+        validators=[MinValueValidator(1), MaxValueValidator(1440)])
     ingredients = models.ManyToManyField(
         Ingredient, through='IngredientAmount',
         verbose_name='Ингридиенты', related_name='recipes')
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Добавлено')
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -108,7 +104,7 @@ class IngredientAmount(models.Model):
     class Meta:
         verbose_name = 'Количество ингридиента'
         verbose_name_plural = 'Количество ингридиентов'
-        ordering = ('recipe',)
+        ordering = ('recipe', 'ingredient')
         constraints = [
             models.UniqueConstraint(
                 fields=('ingredient', 'recipe'),
