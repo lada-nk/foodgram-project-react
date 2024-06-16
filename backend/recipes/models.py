@@ -27,8 +27,8 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return (
-            f'{self.id=:}, '
-            f'{self.name=:20}, '
+            f'{self.id=:}, ' + \\
+            f'{self.name=:20}, ' + \\
             f'{self.measurement_unit=}')
 
 
