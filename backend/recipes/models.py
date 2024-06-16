@@ -83,7 +83,7 @@ class Recipe(models.Model):
     def __str__(self):
         return (
             f'{self.author=}, '
-            f'{self.title=}, '
+            f'{self.name=}, '
             f'{self.text=}, '
             f'{self.tags=}, '
             f'{self.cooking_time=}, '
@@ -140,6 +140,7 @@ class Favorite(SelectRecipeBaseModel):
 
     class Meta(SelectRecipeBaseModel.Meta):
         verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
         default_related_name = 'favorite'
         constraints = [
             models.UniqueConstraint(
@@ -151,6 +152,7 @@ class ShoppingCart(SelectRecipeBaseModel):
 
     class Meta(SelectRecipeBaseModel.Meta):
         verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
         default_related_name = 'customer'
         constraints = [
             models.UniqueConstraint(
